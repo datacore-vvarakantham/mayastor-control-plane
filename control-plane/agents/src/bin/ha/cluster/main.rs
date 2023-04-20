@@ -59,12 +59,15 @@ pub(crate) fn core_grpc<'a>() -> &'a CoreClient {
         .expect("gRPC Core Client should have been initialised")
 }
 
-fn initialize_tracing(args: &Cli, nats: TypedNats) {
+fn initialize_tracing(
+    args: &Cli, 
+    //nats: TypedNats
+) {
     utils::tracing_telemetry::init_tracing(
         "agent-ha-cluster",
         args.tracing_tags.clone(),
         args.jaeger.clone(),
-        nats,
+        //nats,
     )
 }
 
@@ -74,12 +77,15 @@ async fn main() -> anyhow::Result<()> {
 
     let cli = Cli::args();
 
-    let nats = NatsConnectionSpec::from_url("nats://my-nats:4222")
-        .unwrap()
-        .connect()
-        .await
-        .unwrap();
-    initialize_tracing(&cli, nats);
+    // let nats = NatsConnectionSpec::from_url("nats://mayastor-nats:4222")
+    //     .unwrap()
+    //     .connect()
+    //     .await
+    //     .unwrap();
+    initialize_tracing(
+        &cli, 
+        //nats
+    );
 
     // Initialise the core client to be used in rest
     CORE_CLIENT

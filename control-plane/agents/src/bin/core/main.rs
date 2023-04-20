@@ -23,7 +23,7 @@ use utils::{version_info_str, DEFAULT_GRPC_SERVER_ADDR};
 
 use stor_port::HostAccessControl;
 use utils::{
-    nats_connection::NatsConnectionSpec,
+    //nats_connection::NatsConnectionSpec,
     tracing_telemetry::{trace::TracerProvider, KeyValue},
 };
 
@@ -103,16 +103,16 @@ async fn main() {
     let cli_args = CliArgs::args();
     utils::print_package_info!();
     println!("Using options: {:?}", &cli_args);
-    let nats = NatsConnectionSpec::from_url("nats://my-nats:4222")
-        .unwrap()
-        .connect()
-        .await
-        .unwrap();
+    // let nats = NatsConnectionSpec::from_url("nats://mayastor-nats:4222")
+    //     .unwrap()
+    //     .connect()
+    //     .await
+    //     .unwrap();
     utils::tracing_telemetry::init_tracing(
         "core-agent",
         cli_args.tracing_tags.clone(),
         cli_args.jaeger.clone(),
-        nats,
+        //nats,
     );
     server(cli_args).await;
 }

@@ -5,18 +5,12 @@ use anyhow::{anyhow, Error};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Result type for the events
-#[derive(Debug, Clone)]
-#[allow(missing_docs)]
-pub enum Event {
-    VolumeCreated,
-    VolumeDeleted,
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EventCategory {
     Volume,
     Nexus,
+    Pool, 
+    Replica,
 }
 
 impl FromStr for EventCategory {
@@ -26,6 +20,8 @@ impl FromStr for EventCategory {
         match s {
             "volume" => Ok(EventCategory::Volume),
             "nexus" => Ok(EventCategory::Nexus),
+            "pool" => Ok(EventCategory::Pool),
+            "replica" => Ok(EventCategory::Replica),
             _ => Err(anyhow!(
                 "The string {:?} does not describe a valid category.",
                 s
@@ -39,30 +35,17 @@ impl ToString for EventCategory {
         match self {
             EventCategory::Volume => "volume".to_string(),
             EventCategory::Nexus => "nexus".to_string(),
+            EventCategory::Pool => "pool".to_string(),
+            EventCategory::Replica => "replica".to_string(),
         }
     }
 }
-
-// impl fmt::Display for EventCategory {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         match self {
-//             EventCategory::Volume => write!(f, "volume"),
-//             EventCategory::Nexus => write!(f, "nexus"),
-//         }
-//     }
-// }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EventAction {
     Created,
     Deleted,
 }
-
-// impl Display for EventAction {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(f, "{:?}", self)
-//     }
-// }
 
 impl FromStr for EventAction {
     type Err = Error;
@@ -94,6 +77,7 @@ pub struct EventMessage {
     pub category: String,
     pub action: String,
     pub target: String,
+    pub node: String,
 }
 
 impl JetStreamable for EventMessage {
@@ -110,24 +94,56 @@ impl EventMessage {
                 category: EventCategory::Volume.to_string(),
                 action: EventAction::Created.to_string(),
                 target: event.get("target").unwrap().to_string(),
+                node: event.get("node").unwrap().to_string(),
             }),
             "VolumeDeleted" => Some(EventMessage {
                 id: Self::new_random(),
                 category: EventCategory::Volume.to_string(),
                 action: EventAction::Deleted.to_string(),
                 target: event.get("target").unwrap().to_string(),
+                node: event.get("node").unwrap().to_string(),
             }),
             "NexusCreated" => Some(EventMessage {
                 id: Self::new_random(),
                 category: EventCategory::Nexus.to_string(),
                 action: EventAction::Created.to_string(),
                 target: event.get("target").unwrap().to_string(),
+                node: event.get("node").unwrap().to_string(),
             }),
             "NexusDeleted" => Some(EventMessage {
                 id: Self::new_random(),
                 category: EventCategory::Nexus.to_string(),
                 action: EventAction::Deleted.to_string(),
                 target: event.get("target").unwrap().to_string(),
+                node: event.get("node").unwrap().to_string(),
+            }),
+            "PoolCreated" => Some(EventMessage {
+                id: Self::new_random(),
+                category: EventCategory::Pool.to_string(),
+                action: EventAction::Created.to_string(),
+                target: event.get("target").unwrap().to_string(),
+                node: event.get("node").unwrap().to_string(),
+            }),
+            "PoolDeleted" => Some(EventMessage {
+                id: Self::new_random(),
+                category: EventCategory::Pool.to_string(),
+                action: EventAction::Deleted.to_string(),
+                target: event.get("target").unwrap().to_string(),
+                node: event.get("node").unwrap().to_string(),
+            }),
+            "ReplicaCreated" => Some(EventMessage {
+                id: Self::new_random(),
+                category: EventCategory::Replica.to_string(),
+                action: EventAction::Created.to_string(),
+                target: event.get("target").unwrap().to_string(),
+                node: event.get("node").unwrap().to_string(),
+            }),
+            "ReplicaDeleted" => Some(EventMessage {
+                id: Self::new_random(),
+                category: EventCategory::Replica.to_string(),
+                action: EventAction::Deleted.to_string(),
+                target: event.get("target").unwrap().to_string(),
+                node: event.get("node").unwrap().to_string(),
             }),
             _ => {
                 println!("Unexpected event message");

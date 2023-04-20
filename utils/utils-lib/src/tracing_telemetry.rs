@@ -5,7 +5,10 @@ use opentelemetry::sdk::{propagation::TraceContextPropagator, Resource};
 use tracing::Level;
 use tracing_subscriber::{filter, layer::SubscriberExt, util::SubscriberInitExt, Layer, Registry};
 
-use crate::{nats::TypedNats, publisher::EventHandle};
+use crate::{
+    //nats::TypedNats, 
+    publisher::EventHandle
+};
 
 /// Parse KeyValues from structopt's cmdline arguments
 pub fn parse_key_value(source: &str) -> Result<KeyValue, String> {
@@ -65,9 +68,15 @@ pub fn init_tracing(
     service_name: &str,
     tracing_tags: Vec<KeyValue>,
     jaeger: Option<String>,
-    nats: TypedNats,
+    //nats: TypedNats,
 ) {
-    init_tracing_ext(service_name, tracing_tags, jaeger, FmtLayer::Stdout, nats);
+    init_tracing_ext(
+        service_name, 
+        tracing_tags, 
+        jaeger, 
+        FmtLayer::Stdout, 
+        //nats
+    );
 }
 
 /// Fmt Layer for console output.
@@ -87,7 +96,7 @@ pub fn init_tracing_ext<T: std::net::ToSocketAddrs>(
     mut tracing_tags: Vec<KeyValue>,
     jaeger: Option<T>,
     fmt_layer: FmtLayer,
-    nats: TypedNats,
+    //nats: TypedNats,
 ) {
     let filter = rust_log_add_quiet_defaults(
         tracing_subscriber::EnvFilter::try_from_default_env()
@@ -111,7 +120,7 @@ pub fn init_tracing_ext<T: std::net::ToSocketAddrs>(
 
     let mut nats_tracing_handle = EventHandle::init().unwrap();
     let filter = filter::Targets::new().with_target("nats", Level::INFO);
-    nats_tracing_handle.attach_nats(nats).unwrap();
+    // nats_tracing_handle.attach_nats(nats).unwrap();
     //subscriber.with(nats_tracing_handle.layer.with_filter(filter));
 
     match jaeger {

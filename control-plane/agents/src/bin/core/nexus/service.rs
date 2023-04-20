@@ -24,6 +24,7 @@ use stor_port::{
         },
     },
 };
+use tracing::Level;
 
 #[derive(Debug, Clone)]
 pub(super) struct Service {
@@ -40,6 +41,7 @@ impl NexusOperations for Service {
         let req = nexus.into();
         let service = self.clone();
         let nexus = Context::spawn(async move { service.create_nexus(&req).await }).await??;
+        tracing::event!(target: "nats", Level::INFO, event = "NexusCreated", target = &nexus.uuid.to_string(), node = &nexus.node.to_string());
         Ok(nexus)
     }
 
@@ -57,6 +59,7 @@ impl NexusOperations for Service {
         let destroy_nexus = req.into();
         let service = self.clone();
         Context::spawn(async move { service.destroy_nexus(&destroy_nexus).await }).await??;
+        tracing::event!(target: "nats", Level::INFO, event = "NexusDeleted", target = &req.uuid().to_string(), node = &req.node().to_string());
         Ok(())
     }
 

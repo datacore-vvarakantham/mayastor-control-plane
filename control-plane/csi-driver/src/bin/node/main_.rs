@@ -26,7 +26,7 @@ use tokio::{
 };
 use tonic::transport::{server::Connected, Server};
 use tracing::{debug, error, info};
-use utils::nats_connection::NatsConnectionSpec;
+//use utils::nats_connection::NatsConnectionSpec;
 
 #[derive(Clone, Debug)]
 pub struct UdsConnectInfo {
@@ -167,12 +167,16 @@ pub(super) async fn main() -> anyhow::Result<()> {
         env!("CARGO_PKG_VERSION"),
     );
 
-    let nats = NatsConnectionSpec::from_url("nats://my-nats:4222")
-        .unwrap()
-        .connect()
-        .await
-        .unwrap();
-    utils::tracing_telemetry::init_tracing("csi-node", tags, None, nats);
+    // let nats = NatsConnectionSpec::from_url("nats://mayastor-nats:4222")
+    //     .unwrap()
+    //     .connect()
+    //     .await
+    //     .unwrap();
+    utils::tracing_telemetry::init_tracing(
+        "csi-node", 
+        tags, None, 
+        //nats
+    );
 
     if let Some(nvme_io_timeout_secs) = matches.get_one::<String>("nvme-core-io-timeout") {
         let io_timeout_secs: u32 = nvme_io_timeout_secs.parse().expect(

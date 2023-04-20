@@ -10,7 +10,7 @@ mod server;
 
 use client::{ApiClientError, CreateVolumeTopology, IoEngineApiClient};
 use config::CsiControllerConfig;
-use utils::nats_connection::NatsConnectionSpec;
+//use utils::nats_connection::NatsConnectionSpec;
 
 const CSI_SOCKET: &str = "/var/tmp/csi.sock";
 
@@ -77,17 +77,17 @@ async fn main() -> anyhow::Result<()> {
         env!("CARGO_PKG_VERSION"),
     );
 
-    let nats = NatsConnectionSpec::from_url("nats://my-nats:4222")
-        .unwrap()
-        .connect()
-        .await
-        .unwrap();
+    // let nats = NatsConnectionSpec::from_url("nats://mayastor-nats:4222")
+    //     .unwrap()
+    //     .connect()
+    //     .await
+    //     .unwrap();
 
     utils::tracing_telemetry::init_tracing(
         "csi-controller",
         tags,
         args.get_one::<String>("jaeger").cloned(),
-        nats,
+        //nats,
     );
 
     initialize_controller(&args)?;

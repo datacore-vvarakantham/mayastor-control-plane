@@ -87,7 +87,7 @@ impl ResourceLifecycle for OperationGuardArc<VolumeSpec> {
             match OperationGuardArc::<ReplicaSpec>::create(registry, &replica).await {
                 Ok(replica) => {
                     replicas.push(replica);
-                    tracing::event!(target: "nats", Level::INFO, event = "VolumeCreated", target = "volume1");
+                    // tracing::event!(target: "nats", Level::INFO, event = "VolumeCreated", target = "volume1");
                 }
                 Err(error) => {
                     volume_clone.error(&format!(

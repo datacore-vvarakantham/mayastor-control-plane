@@ -144,7 +144,7 @@ pub(crate) trait GuardedOperationsHelper:
             Ok(val) => {
                 tracing::info!(?val, "complete_create");
 
-                tracing::event!(target: "nats", Level::INFO, event = "VolumeCreated", target = "volume1");
+                // tracing::event!(target: "nats", Level::INFO, event = "VolumeCreated", target = "volume1");
 
                 let mut spec_clone = self.lock().clone();
                 spec_clone.commit_op();

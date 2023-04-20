@@ -31,6 +31,7 @@ use stor_port::{
         },
     },
 };
+use tracing::Level;
 
 use snafu::OptionExt;
 
@@ -49,6 +50,7 @@ impl PoolOperations for Service {
         let req = pool.into();
         let service = self.clone();
         let pool = Context::spawn(async move { service.create_pool(&req).await }).await??;
+        tracing::event!(target: "nats", Level::INFO, event = "PoolCreated", target = &pool.spec().unwrap().id.to_string(), node = &pool.spec().unwrap().node.to_string());
         Ok(pool)
     }
 
@@ -57,9 +59,11 @@ impl PoolOperations for Service {
         pool: &dyn DestroyPoolInfo,
         _ctx: Option<Context>,
     ) -> Result<(), ReplyError> {
-        let req = pool.into();
+        let req: DestroyPool = pool.into();
         let service = self.clone();
-        Context::spawn(async move { service.destroy_pool(&req).await }).await??;
+        let req_clone = req.clone();
+        Context::spawn(async move { service.destroy_pool(&req.clone()).await }).await??;
+        tracing::event!(target: "nats", Level::INFO, event = "PoolDeleted", target = &req_clone.id.to_string(), node = &req_clone.node.to_string());
         Ok(())
     }
 

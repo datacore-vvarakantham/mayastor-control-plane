@@ -55,6 +55,8 @@ impl TypedNats {
         let subjects = vec![
             "stats.events.volume".to_string(),
             "stats.events.nexus".to_string(),
+            "stats.events.pool".to_string(),
+            "stats.events.replica".to_string(),
         ];
         let config = async_nats::jetstream::stream::Config {
             name: stream_name,

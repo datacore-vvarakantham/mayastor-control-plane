@@ -31,6 +31,7 @@ use stor_port::{
         },
     },
 };
+use tracing::Level;
 
 #[derive(Debug, Clone)]
 pub(super) struct Service {
@@ -107,6 +108,7 @@ impl VolumeOperations for Service {
         let service = self.clone();
         let volume =
             Context::spawn(async move { service.publish_volume(&publish_volume).await }).await??;
+        tracing::event!(target: "nats", Level::INFO, event = "VolumeCreated", target = &req.uuid().to_string(), node = "");
         Ok(volume)
     }
 
@@ -120,6 +122,7 @@ impl VolumeOperations for Service {
         let volume =
             Context::spawn(async move { service.republish_volume(&republish_volume).await })
                 .await??;
+        tracing::event!(target: "nats", Level::INFO, event = "VolumeCreated", target = &req.uuid().to_string(), node = "");
         Ok(volume)
     }
 
@@ -133,6 +136,7 @@ impl VolumeOperations for Service {
         let volume =
             Context::spawn(async move { service.unpublish_volume(&unpublish_volume).await })
                 .await??;
+        tracing::event!(target: "nats", Level::INFO, event = "VolumeDeleted", target = req.uuid().to_string(), node = "");
         Ok(volume)
     }
 

@@ -1,18 +1,21 @@
-//use crate::message::Event;
 use crate::{message::EventMessage, nats::TypedNats};
 use anyhow::{anyhow, Result};
 use std::{collections::BTreeMap, fmt::Debug};
 use tokio::sync::mpsc::{Receiver, Sender};
 
-//use tracing::Id;
 use tracing::field::{Field, Visit};
-//use tracing::span::Attributes;
 use tracing_subscriber::{layer::Context, registry::LookupSpan, Layer};
+use crate::nats_connection::NatsConnectionSpec;
 
 async fn publish_events(
-    nc: &TypedNats,
+    //nc: &TypedNats,
     mut recv: tokio::sync::mpsc::Receiver<BTreeMap<String, String>>,
 ) {
+    let nc = NatsConnectionSpec::from_url("nats://mayastor-nats:4222")
+        .unwrap()
+        .connect()
+        .await
+        .unwrap();
     while let Some(msg1) = recv.recv().await {
         if let Some(msg) = EventMessage::from_event(msg1) {
             if let Err(err) = nc.publish_jetstream(&msg).await {
@@ -23,7 +26,7 @@ async fn publish_events(
 }
 
 pub struct EventHandle {
-    recv: Option<Receiver<BTreeMap<String, String>>>,
+    //recv: Option<Receiver<BTreeMap<String, String>>>,
     pub layer: EventManager,
 }
 
@@ -32,24 +35,28 @@ impl EventHandle {
         let (send, recv) = tokio::sync::mpsc::channel::<BTreeMap<String, String>>(128);
 
         let layer = EventManager::new(send);
+        tokio::spawn(async move {
+            publish_events(recv).await;
+            tracing::error!("publish_events terminated.");
+        });
 
         Ok(EventHandle {
-            recv: Some(recv),
+            //recv: Some(recv),
             layer,
         })
     }
 
-    pub fn attach_nats(&mut self, nats: TypedNats) -> Result<()> {
-        let recv = self.recv.take().ok_or_else(|| {
-            anyhow!("connect_nats on TracingHandle should not be called more than once.")
-        })?;
-        tokio::spawn(async move {
-            publish_events(&nats, recv).await;
-            tracing::error!("do_logs terminated.");
-        });
+    // pub fn attach_nats(&mut self, nats: TypedNats) -> Result<()> {
+    //     let recv = self.recv.take().ok_or_else(|| {
+    //         anyhow!("connect_nats on EventHandle should not be called more than once.")
+    //     })?;
+    //     tokio::spawn(async move {
+    //         publish_events(&nats, recv).await;
+    //         tracing::error!("publish_events terminated.");
+    //     });
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 }
 
 pub struct EventManager {
@@ -67,23 +74,13 @@ where
     S: tracing::Subscriber + for<'a> LookupSpan<'a>,
 {
     fn on_event(&self, event: &tracing::Event<'_>, ctx: Context<'_, S>) {
-        let mut visitor = if let Some(span) = ctx.lookup_current() {
-            let extensions = span.extensions();
-            if let Some(visitor) = extensions.get::<JsonVisitor>() {
-                visitor.clone()
-            } else {
-                JsonVisitor::default()
-            }
-        } else {
-            JsonVisitor::default()
-        };
+        let mut visitor = JsonVisitor::default();
 
         event.record(&mut visitor);
 
         let output = visitor.0;
 
         // make sure logging in this function call does not trigger an infinite loop
-        // self.nc.publish_drone_log_message(&msg).unwrap();
         if self.sender.try_send(output).is_err() {
             println!("Warning: sender buffer is full.");
         }

@@ -24,7 +24,7 @@ mod server;
 
 use detector::PathFailureDetector;
 use server::NodeAgentApiServer;
-use utils::nats_connection::NatsConnectionSpec;
+///use utils::nats_connection::NatsConnectionSpec;
 
 /// TODO
 #[derive(Debug, Parser)]
@@ -95,16 +95,16 @@ async fn main() {
 
     utils::print_package_info!();
 
-    let nats = NatsConnectionSpec::from_url("nats://my-nats:4222")
-        .unwrap()
-        .connect()
-        .await
-        .unwrap();
+    // let nats = NatsConnectionSpec::from_url("nats://mayastor-nats:4222")
+    //     .unwrap()
+    //     .connect()
+    //     .await
+    //     .unwrap();
     utils::tracing_telemetry::init_tracing(
         "agent-ha-node",
         cli_args.tracing_tags.clone(),
         cli_args.jaeger.clone(),
-        nats,
+        //nats,
     );
 
     CLUSTER_AGENT_CLIENT

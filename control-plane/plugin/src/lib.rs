@@ -1,4 +1,4 @@
-use utils::nats::TypedNats;
+//use utils::nats::TypedNats;
 
 #[macro_use]
 extern crate prettytable;
@@ -10,7 +10,10 @@ pub mod resources;
 pub mod rest_wrapper;
 
 /// Initialize tracing (including opentelemetry).
-pub fn init_tracing(jaeger: Option<&String>, nats: TypedNats) {
+pub fn init_tracing(
+    jaeger: Option<&String>, 
+    //nats: TypedNats
+) {
     let git_version = option_env!("GIT_VERSION").unwrap_or_else(utils::raw_version_str);
     let tags =
         utils::tracing_telemetry::default_tracing_tags(git_version, env!("CARGO_PKG_VERSION"));
@@ -24,6 +27,6 @@ pub fn init_tracing(jaeger: Option<&String>, nats: TypedNats) {
         tags,
         jaeger,
         fmt_layer,
-        nats,
+        //nats,
     );
 }

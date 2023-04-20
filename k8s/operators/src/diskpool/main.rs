@@ -34,7 +34,7 @@ use std::{
     time::Duration,
 };
 use tracing::{debug, error, info, trace, warn};
-use utils::nats_connection::NatsConnectionSpec;
+//use utils::nats_connection::NatsConnectionSpec;
 
 const WHO_AM_I: &str = "DiskPool Operator";
 const WHO_AM_I_SHORT: &str = "dsp-operator";
@@ -861,16 +861,16 @@ async fn main() -> anyhow::Result<()> {
         env!("CARGO_PKG_VERSION"),
     );
 
-    let nats = NatsConnectionSpec::from_url("nats://my-nats:4222")
-        .unwrap()
-        .connect()
-        .await
-        .unwrap();
+    // let nats = NatsConnectionSpec::from_url("nats://mayastor-nats:4222")
+    //     .unwrap()
+    //     .connect()
+    //     .await
+    //     .unwrap();
     utils::tracing_telemetry::init_tracing(
         "dsp-operator",
         tags,
         matches.get_one::<String>("jaeger").cloned(),
-        nats,
+        //nats,
     );
 
     pool_controller(matches).await?;

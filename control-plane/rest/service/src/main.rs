@@ -206,16 +206,16 @@ async fn main() -> anyhow::Result<()> {
     let cli_args = CliArgs::args();
     println!("Using options: {:?}", &cli_args);
 
-    let nats = NatsConnectionSpec::from_url("nats://my-nats:4222")
-        .unwrap()
-        .connect()
-        .await
-        .unwrap();
+    // let nats = NatsConnectionSpec::from_url("nats://mayastor-nats:4222")
+    //     .unwrap()
+    //     .connect()
+    //     .await
+    //     .unwrap();
     utils::tracing_telemetry::init_tracing(
         "rest-server",
         cli_args.tracing_tags.clone(),
         cli_args.jaeger.clone(),
-        nats,
+        //nats,
     );
 
     let app = move || {

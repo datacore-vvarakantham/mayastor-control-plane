@@ -19,6 +19,7 @@ use stor_port::types::v0::{
         ShareReplica, UnshareReplica,
     },
 };
+use tracing::Level;
 
 #[async_trait::async_trait]
 impl ResourceLifecycle for OperationGuardArc<ReplicaSpec> {
@@ -47,6 +48,7 @@ impl ResourceLifecycle for OperationGuardArc<ReplicaSpec> {
         let _ = replica.start_create(registry, request).await?;
 
         let result = node.create_replica(request).await;
+        tracing::event!(target: "nats", Level::INFO, event = "ReplicaCreated", target = &request.uuid.to_string(), node = &request.node.to_string());
         let on_fail = OnCreateFail::eeinval_delete(&result);
 
         replica.complete_create(result, registry, on_fail).await
@@ -57,6 +59,7 @@ impl ResourceLifecycle for OperationGuardArc<ReplicaSpec> {
         registry: &Registry,
         request: &Self::Destroy,
     ) -> Result<(), SvcError> {
+        tracing::event!(target: "nats", Level::INFO, event = "ReplicaDeleted", target = &request.uuid.to_string(), node = &request.node.to_string());
         Some(self).destroy(registry, request).await
     }
 }
